@@ -1,0 +1,19 @@
+ethics:
+  max_requests_per_minute: 60
+  user_agent: "Ethical Security Scanner v1.0"
+  respect_robots_txt: true
+  
+ollama:
+  model: "deepseek-r1:14b"
+  host: "http://localhost:11434"
+  
+scanning:
+  timeout: 10
+  max_depth: 2
+  enable_time_based_sqli: false
+  
+cve:
+  nvd_api: "https://services.nvd.nist.gov/rest/json/cves/2.0"
+  # api_key: "YOUR_KEY_HERE"  <-- Set NVD_API_KEY in system environment variables!
+  api_key: ""
+  rate_limit_seconds: 3
