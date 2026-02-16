@@ -5,6 +5,7 @@ import json
 import yaml
 import requests
 from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import CheckpointCallback
 from PentestGymEnv import PentestGymEnv
 import torch
 
@@ -58,8 +59,15 @@ class TrainingPipeline:
         print(f"[MODEL] Initializing PPO Agent...")
         model = PPO("MlpPolicy", env, verbose=1, device=device)
         
-        print(f"[TRAIN] Starting training for {total_timesteps} timesteps...")
-        model.learn(total_timesteps=total_timesteps)
+        # Checkpoint callback
+        checkpoint_callback = CheckpointCallback(
+            save_freq=100,
+            save_path="./logs/checkpoints/",
+            name_prefix="rl_model"
+        )
+        
+        print(f"[TRAIN] Starting training for {total_timesteps} timesteps (Checkpoints enabled)...")
+        model.learn(total_timesteps=total_timesteps, callback=checkpoint_callback)
         
         print(f"[SAVE] Saving model to ppo_pentest_agent.zip")
         model.save("ppo_pentest_agent")
