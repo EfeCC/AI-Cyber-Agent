@@ -1,0 +1,41 @@
+# docker-compose.yml
+version: '3'
+services:
+  # Zafiyet 1: SQL Injection
+  dvwa:
+    image: vulnerables/web-dvwa
+    ports:
+      - "8080:80"
+    
+  # Zafiyet 2: XSS, CSRF
+  juice-shop:
+    image: bkimminich/juice-shop
+    ports:
+      - "3000:3000"
+  
+  # Zafiyet 3: Eski WordPress
+  wordpress-vuln:
+    image: wordpress:5.0.0  # Bilinen CVE'li versiyon
+    ports:
+      - "8081:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_PASSWORD: password
+  
+  # Zafiyet 4: Eski Apache Tomcat
+  tomcat-vuln:
+    image: tomcat:8.5.0  # CVE'li versiyon
+    ports:
+      - "8082:8080"
+  
+  # Zafiyet 5: WebGoat (OWASP)
+  webgoat:
+    image: webgoat/webgoat
+    ports:
+      - "8083:8080"
+  
+  # Veritabanı
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
