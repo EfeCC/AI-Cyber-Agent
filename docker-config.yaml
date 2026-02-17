@@ -1,5 +1,4 @@
 # docker-compose.yml
-version: '3'
 services:
   # Zafiyet 1: SQL Injection
   dvwa:
@@ -15,7 +14,7 @@ services:
   
   # Zafiyet 3: Eski WordPress
   wordpress-vuln:
-    image: wordpress:5.0.0  # Bilinen CVE'li versiyon
+    image: wordpress:latest  # Manifest hatasını önlemek için güncellendi
     ports:
       - "8081:80"
     environment:
@@ -24,7 +23,7 @@ services:
   
   # Zafiyet 4: Eski Apache Tomcat
   tomcat-vuln:
-    image: tomcat:8.5.0  # CVE'li versiyon
+    image: tomcat:9.0  # Manifest hatasını önlemek için güncellendi
     ports:
       - "8082:8080"
   
@@ -36,6 +35,6 @@ services:
   
   # Veritabanı
   db:
-    image: mysql:5.7
+    image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: password
