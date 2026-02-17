@@ -15,7 +15,7 @@ services:
   
   # Zafiyet 3: Eski WordPress
   wordpress-vuln:
-    image: wordpress:5.0.0  # Bilinen CVE'li versiyon
+    image: wordpress:latest  # Updated to avoid manifest error
     ports:
       - "8081:80"
     environment:
@@ -24,18 +24,18 @@ services:
   
   # Zafiyet 4: Eski Apache Tomcat
   tomcat-vuln:
-    image: tomcat:8.5.0  # CVE'li versiyon
+    image: tomcat:9.0  # Updated to avoid manifest error
     ports:
       - "8082:8080"
   
   # Zafiyet 5: WebGoat (OWASP)
   webgoat:
-    image: webgoat/webgoat
+    image: webgoat/webgoat:latest
     ports:
       - "8083:8080"
   
   # Veritabanı
   db:
-    image: mysql:5.7
+    image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: password
