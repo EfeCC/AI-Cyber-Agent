@@ -3,6 +3,7 @@ import os
 import torch
 import yaml
 from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import CheckpointCallback
 from PentestGymEnv import PentestGymEnv
 from colorama import Fore, init
 
@@ -38,7 +39,7 @@ class CodeExpertTrainer:
                 self.training_targets.append(target_url)
                 print(f"  Added Target: {target_url} ({service_name})")
 
-    def train_adapter(self, total_timesteps=1024):
+    def train_adapter(self, total_timesteps=1024, checkpoint_freq=100):
         if not os.path.exists(self.base_model_path):
             print(f"{Fore.RED}[ERROR] Base model not found at {self.base_model_path}")
             return
@@ -50,21 +51,26 @@ class CodeExpertTrainer:
         model = PPO.load(self.base_model_path, env=env, device=device)
         
         print(f"{Fore.YELLOW}[2/3] Freezing Base Model (LoRA-style)...")
-        # In a standard MlpPolicy, the policy and value networks are what we want to adapt.
-        # However, for a true LoRA approach, we would freeze everything and add layers.
-        # Here, we will freeze the feature extractor (shared representation) and only train the policy heads.
-        
         # Freeze Feature Extractor
         for param in model.policy.features_extractor.parameters():
             param.requires_grad = False
             
         print(f"{Fore.GREEN}[+] Feature extractor frozen. Only policy/value heads will be trained.")
 
+        # Checkpoint callback
+        checkpoint_path = "./logs/checkpoints/code_expert/"
+        os.makedirs(checkpoint_path, exist_ok=True)
+        checkpoint_callback = CheckpointCallback(
+            save_freq=checkpoint_freq,
+            save_path=checkpoint_path,
+            name_prefix="code_expert_model"
+        )
+
         print(f"\n{Fore.YELLOW}[3/3] Starting 'Code Expert' training for {total_timesteps} steps...")
-        # Reduce learning rate for fine-tuning the adapter
-        model.learning_rate = 0.0001 
+        print(f"{Fore.CYAN}[*] Checkpoints enabled every {checkpoint_freq} steps.")
         
-        model.learn(total_timesteps=total_timesteps, reset_num_timesteps=False)
+        model.learning_rate = 0.0001 
+        model.learn(total_timesteps=total_timesteps, callback=checkpoint_callback, reset_num_timesteps=False)
         
         output_name = "ppo_pentest_agent_code_expert"
         model.save(output_name)
@@ -74,8 +80,9 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Code Expert LoRA Trainer")
     parser.add_argument("--base", type=str, default="logs/checkpoints/rl_model_800_steps.zip", help="Path to base model")
-    parser.add_argument("--steps", type=int, default=1024, help="Steps to train the adapter")
+    parser.add_argument("--steps", type=int, default=1024, help="Total timesteps to train the adapter")
+    parser.add_argument("--checkpoint", type=int, default=100, help="Steps between checkpoints")
     args = parser.parse_args()
     
     trainer = CodeExpertTrainer(base_model_path=args.base)
-    trainer.train_adapter(total_timesteps=args.steps)
+    trainer.train_adapter(total_timesteps=args.steps, checkpoint_freq=args.checkpoint)
