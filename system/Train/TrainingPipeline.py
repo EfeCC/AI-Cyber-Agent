@@ -45,7 +45,7 @@ class TrainingPipeline:
                 self.training_targets.append(target_url)
                 print(f"  Added Target: {target_url} ({service_name})")
 
-    def train(self, total_timesteps=1000):
+    def train(self, total_timesteps=1000, load_path=None):
         if not self.training_targets:
             print("No targets found. Exiting.")
             return
@@ -56,8 +56,12 @@ class TrainingPipeline:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         print(f"[DEVICE] Training on {device.upper()}")
         
-        print(f"[MODEL] Initializing PPO Agent...")
-        model = PPO("MlpPolicy", env, verbose=1, device=device)
+        if load_path and os.path.exists(load_path):
+            print(f"[LOAD] Loading existing model from {load_path}...")
+            model = PPO.load(load_path, env=env, device=device)
+        else:
+            print(f"[MODEL] Initializing new PPO Agent...")
+            model = PPO("MlpPolicy", env, verbose=1, device=device)
         
         # Checkpoint callback
         checkpoint_callback = CheckpointCallback(
@@ -67,7 +71,7 @@ class TrainingPipeline:
         )
         
         print(f"[TRAIN] Starting training for {total_timesteps} timesteps (Checkpoints enabled)...")
-        model.learn(total_timesteps=total_timesteps, callback=checkpoint_callback)
+        model.learn(total_timesteps=total_timesteps, callback=checkpoint_callback, reset_num_timesteps=False)
         
         print(f"[SAVE] Saving model to ppo_pentest_agent.zip")
         model.save("ppo_pentest_agent")
@@ -75,5 +79,16 @@ class TrainingPipeline:
         print(f"[DONE] Training complete.")
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Pentest AI Training Pipeline")
+    parser.add_argument("--load", type=str, help="Path to a model checkpoint to resume training from")
+    parser.add_argument("--steps", type=int, default=2048, help="Total timesteps for training")
+    args = parser.parse_args()
+    
     pipeline = TrainingPipeline()
-    pipeline.train(total_timesteps=2048)
+    
+    # Checkpoint'ten devam etmek istersen buraya dosya yolunu yazabilirsin
+    # Örn: load_path = "logs/checkpoints/rl_model_100_steps.zip"
+    load_path = args.load 
+    
+    pipeline.train(total_timesteps=args.steps, load_path="logs/checkpoints/rl_model_100_steps.zip")
