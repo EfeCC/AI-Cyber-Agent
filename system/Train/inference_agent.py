@@ -3,15 +3,16 @@ import sys
 import argparse
 import torch
 from stable_baselines3 import PPO
+
+
 from PentestGymEnv import PentestGymEnv
 from colorama import Fore, init
 
 init(autoreset=True)
 
-def run_inference(model_path, target_url, max_steps=10, adapter_path=None):
+def run_inference(model_path, target_url, max_steps=10):
     """
     Trained model'i yükleyip belirli bir hedef üzerinde koşturur.
-    Opsiyonel olarak bir 'Code Expert' adapter'ı yükler.
     """
     if not os.path.exists(model_path):
         print(f"{Fore.RED}[ERROR] Model dosyası bulunamadı: {model_path}")
@@ -30,18 +31,7 @@ def run_inference(model_path, target_url, max_steps=10, adapter_path=None):
         print(f"{Fore.RED}[ERROR] Ana Model yükleme hatası: {e}")
         return
 
-    # Adapter Yükleme
-    adapter = None
-    if adapter_path and os.path.exists(adapter_path):
-        try:
-            print(f"{Fore.MAGENTA}[*] Code Expert Adapter yükleniyor: {adapter_path}")
-            adapter = PPO.load(adapter_path, env=env, device=device)
-            print(f"{Fore.GREEN}[+] Adapter başarıyla yüklendi.")
-        except Exception as e:
-            print(f"{Fore.YELLOW}[!] Adapter yüklenemedi: {e}")
 
-    print(f"{Fore.YELLOW}[*] Ajan başlatılıyor. Hedef: {target_url}")
-    print(f"{Fore.YELLOW}[*] Maksimum adım sayısı: {max_steps}")
 
     obs, info = env.reset()
     total_reward = 0
@@ -66,14 +56,7 @@ def run_inference(model_path, target_url, max_steps=10, adapter_path=None):
         
         # MODÜLER YOL: Eğer aksiyon Source Analysis ise ve adapter varsa, 
         # adapter'ın bu durumdaki 'uzman' görüşünü alalım
-        if int(action) == 4 and adapter:
-            print(f"{Fore.MAGENTA}[ADAPTER] Code Expert devreye giriyor...")
-            # Burada adapter'ın kendi prediction'ını alabiliriz veya direkt devam edebiliriz.
-            # Şimdilik adapter yüklü ise aksiyonu adapter'dan geçirelim.
-            action, _ = adapter.predict(obs, deterministic=True)
-            curr_action = action_names.get(int(action), f"Unknown({action})")
 
-        print(f"{Fore.BLUE}[Step {step}] Ajan aksiyon alıyor: {Fore.WHITE}{curr_action}")
         
         obs, reward, terminated, truncated, info = env.step(action)
         total_reward += reward
@@ -91,11 +74,10 @@ def run_inference(model_path, target_url, max_steps=10, adapter_path=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Trained Pentest AI Agent Inference")
-    parser.add_argument("--model", type=str, required=True, help="Path to the .zip model checkpoint")
-    parser.add_argument("--target", type=str, required=True, help="Target URL to pentest")
+    parser.add_argument("--model", type=str, default="logs/checkpoints/rl_model_700_steps.zip", help="Path to the .zip model checkpoint")
+    parser.add_argument("--target", type=str, default="http://localhost:8080", help="Target URL to pentest")
     parser.add_argument("--steps", type=int, default=10, help="Maximum steps for the agent")
-    parser.add_argument("--adapter", type=str, default=None, help="Path to the Code Expert adapter (.zip)")
 
     args = parser.parse_args()
     
-    run_inference(args.model, args.target, args.steps, args.adapter)
+    run_inference(args.model, args.target, args.steps)
