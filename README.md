@@ -36,7 +36,7 @@ python system/PentestAiAgent/main.py --target http://hedef-site.com
 
 ### B. Akıllı Tarama (Trained RL Model)
 ```bash
-python system/Train/inference_agent.py --target http://hedef-site.com
+python inference_agent.py --target http://hedef-site.com
 ```
 
 ### C. Eğitim (Modeli Kendin Geliştir)

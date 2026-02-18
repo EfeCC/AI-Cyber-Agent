@@ -3,10 +3,11 @@ import sys
 import argparse
 import torch
 from stable_baselines3 import PPO
-
-
-from PentestGymEnv import PentestGymEnv
 from colorama import Fore, init
+
+# Adjusting path to find PentestGymEnv properly
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'system', 'Train')))
+from PentestGymEnv import PentestGymEnv
 
 init(autoreset=True)
 
@@ -30,8 +31,6 @@ def run_inference(model_path, target_url, max_steps=10):
     except Exception as e:
         print(f"{Fore.RED}[ERROR] Ana Model yükleme hatası: {e}")
         return
-
-
 
     obs, info = env.reset()
     total_reward = 0
@@ -70,10 +69,6 @@ def run_inference(model_path, target_url, max_steps=10):
         }
         
         curr_action = action_names.get(int(action), f"Unknown({action})")
-        
-        # MODÜLER YOL: Eğer aksiyon Source Analysis ise ve adapter varsa, 
-        # adapter'ın bu durumdaki 'uzman' görüşünü alalım
-
         
         obs, reward, terminated, truncated, info = env.step(action)
         total_reward += reward
