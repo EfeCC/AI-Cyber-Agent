@@ -15,5 +15,5 @@ scanning:
 cve:
   nvd_api: "https://services.nvd.nist.gov/rest/json/cves/2.0"
   # api_key: "YOUR_KEY_HERE"  <-- Set NVD_API_KEY in system environment variables!
-  api_key: "a60fbde9-e8d5-4d4d-b52b-2e9819893de9"
+  api_key: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
   rate_limit_seconds: 3
