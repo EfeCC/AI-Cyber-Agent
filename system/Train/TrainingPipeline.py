@@ -93,4 +93,4 @@ if __name__ == "__main__":
     # Örn: load_path = "logs/checkpoints/rl_model_100_steps.zip"
     load_path = args.load 
     
-    pipeline.train(total_timesteps=args.steps, load_path="logs/checkpoints/rl_model_100_steps.zip")
+    pipeline.train(total_timesteps=args.steps, load_path=args.load)
